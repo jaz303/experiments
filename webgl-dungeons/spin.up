@@ -1,0 +1,3 @@
+scss --watch scss/main.scss:assets/main.css
+watchify -d -t [ babelify --presets [ react es2015 ] ] -t brfs -o assets/bundle.js lib/main.js
+static . -p 8080
