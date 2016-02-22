@@ -11,6 +11,12 @@ var shaderSources = {
 	fragment: fs.readFileSync(__dirname + '/shaders/fragment.glsl')	
 };
 
+var player = {
+	x: 0,
+	y: 0,
+	facing: 0
+};
+
 window.init = function() {
 	var canvas = document.querySelector('#canvas');
  	var gl = canvas.getContext('webgl');
@@ -22,7 +28,7 @@ window.init = function() {
  	gl.clearColor(0, 0, 0, 1);
  	gl.enable(gl.DEPTH_TEST);
  	gl.depthFunc(gl.LEQUAL);
- 	gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
+ 	
 
  	var program = glh.compileShaderProgramFromSources(shaderSources.vertex, shaderSources.fragment);
  	gl.useProgram(program);
@@ -32,7 +38,6 @@ window.init = function() {
 
  	mvMatrix = mat4.create();
  	mat4.identity(mvMatrix);
- 	mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0, 0, -7));
  	//mat4.lookAt(vMatrix, vec3.create(0, 0, 2), vec3.create(0, 0, 1), vec3.create(0, 1, 0));
 
  	var lVertexPosition = gl.getAttribLocation(program, 'vertexPosition');
@@ -41,24 +46,48 @@ window.init = function() {
  	var lPMatrix = gl.getUniformLocation(program, 'pMatrix');
  	gl.uniformMatrix4fv(lPMatrix, false, pMatrix);
 
- 	console.log(pMatrix);
- 	console.log(mvMatrix);
-
  	var lMVMatrix = gl.getUniformLocation(program, 'mvMatrix');
- 	gl.uniformMatrix4fv(lMVMatrix, false, mvMatrix);
+ 	
+	var map = createMap(gl, [
+ 		[ -1, 0, 1, 0 ],
+ 		[ -1, 0, -1, 2 ],
+ 		[  1, 0, 1, 2 ],
+ 		[ -1, 2, -3, 2 ],
+ 		[ 1, 2, 3, 3 ],
+	]);
 
- 	// console.log(lVertexPosition, lMVPMatrix);
+	var r = 0;
 
-	var square = createSquare(gl);
-	square.bind();
- 	square.draw(lVertexPosition);
+ 	window.requestAnimationFrame(function _render() {
+ 		gl.clear(gl.COLOR_BUFFER_BIT, gl.DEPTH_BUFFER_BIT);
 
- 	gl.flush();
+ 		// r += 0.02;
+
+ 		mat4.identity(mvMatrix);
+ 		mat4.rotateY(mvMatrix, mvMatrix, r);
+ 		mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0, 0, -6));
+
+
+ 		gl.uniformMatrix4fv(lMVMatrix, false, mvMatrix);
+ 		map.forEach(function(wall) {
+ 			wall.bind();
+ 			wall.draw(lVertexPosition);
+ 		});
+ 		gl.flush();
+		window.requestAnimationFrame(_render);
+ 	});
+
+
+ 	canvas.onkeydown = function(evt) {
+ 		switch (evt.which) {
+
+ 		}
+ 	}
 }
 
-
-
-
+function createMap(gl, walls) {
+	return walls.map((w) => createWall(gl, ...w));
+}
 
 function Shape(gl, drawMode, floatData) {
 	this.gl = gl;
@@ -89,6 +118,15 @@ function createSquare(gl) {
 	    1.0,  -1.0, 0.0,
 	    -1.0, -1.0, 0.0
   	]));
+}
+
+function createWall(gl, x1, z1, x2, z2) {
+	return new Shape(gl, gl.TRIANGLE_STRIP, new Float32Array([
+		x1, 1.0, z1,
+		x2, 1.0, z2,
+		x1, -1.0, z1,
+		x2, -1.0, z2
+	]));
 }
 
 
