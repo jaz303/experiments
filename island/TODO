@@ -1,0 +1,9 @@
+Basics
+------
+
+[x] map renderer
+[x] random terrain generator
+[x] map scrolling
+[x] resolve click to co-ord
+[x] fix map scrolling
+[ ] fix map zooming
