@@ -54,18 +54,41 @@ class Map {
 }
 
 class Camera {
-	constructor(map) {
+	constructor(map, width, height) {
 		this.map = map;
 		this.x = floor((map.tilesWide * MAX_TILE_SIZE) / 2);
 		this.y = floor((map.tilesTall * MAX_TILE_SIZE) / 2);
-		this.tileSize = INITIAL_TILE_SIZE;	
+		this.tileSize = INITIAL_TILE_SIZE;
+		this.scale = this.tileSize / MAX_TILE_SIZE;
+		this.width = width;
+		this.height = height;
+	}
+
+	get cornerX() {
+		return (this.x * this.scale) - (this.width / 2);
+	}
+
+	get cornerY() {
+		return (this.y * this.scale) - (this.height / 2);	
+	}
+
+	zoomIn() {
+		if (this.tileSize < MAX_TILE_SIZE) {
+			this.tileSize *= 2;
+			this.scale = this.tileSize / MAX_TILE_SIZE;
+		}
+	}
+
+	zoomOut() {
+		if (this.tileSize > MIN_TILE_SIZE) {
+			this.tileSize /= 2;
+			this.scale = this.tileSize / MAX_TILE_SIZE;
+		}
 	}
 	
 	pixelToWorldPixel(x, y, out) {
-		return false;
-
-		out.x = x + this.x;
-		out.y = y + this.y;
+		out.x = this.cornerX + x;
+		out.y = this.cornerY + y;
 		if (out.x < 0 || out.y < 0) return false;
 		if (out.x >= this.map.tilesWide * this.tileSize) return false;
 		if (out.y >= this.map.tilesTall * this.tileSize) return false;
@@ -73,8 +96,6 @@ class Camera {
 	}
 
 	pixelToWorldTile(x, y, out) {
-		return false;
-
 		if (!this.pixelToWorldPixel(x, y, out)) {
 			return false;
 		}
@@ -100,9 +121,8 @@ function render(ctx, map, camera) {
 
 	ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-	const scale = tileSize / MAX_TILE_SIZE;
-	const cornerX = (camera.x * scale) - (canvasWidth / 2);
-	const cornerY = (camera.y * scale) - (canvasHeight / 2);
+	const cornerX = camera.cornerX;
+	const cornerY = camera.cornerY;
 	const canvasTilesWide = ceil(canvasWidth / tileSize);
 	const canvasTilesTall = ceil(canvasHeight / tileSize);
 
@@ -147,7 +167,7 @@ window.init = function() {
     var ctx = canvas.getContext('2d');
 
     var map = generateMap(100, 100);
-    var camera = new Camera(map);
+    var camera = new Camera(map, canvas.width, canvas.height);
 
     var controls = createControlState({
     	16 	: 'shift',
@@ -195,13 +215,9 @@ window.init = function() {
 			camera.x += scrollSpeed;
 		}
 		if (controlState.zoomIn.isDown && controlState.zoomIn.halfTransitionCount) {
-			if (camera.tileSize < MAX_TILE_SIZE) {
-				camera.tileSize *= 2;	
-			}
+			camera.zoomIn();
 		} else if (controlState.zoomOut.isDown && controlState.zoomOut.halfTransitionCount) {
-			if (camera.tileSize > MIN_TILE_SIZE) {
-				camera.tileSize /= 2;	
-			}
+			camera.zoomOut();
 		}
 		render(ctx, map, camera);
 		controls.frameReset();
