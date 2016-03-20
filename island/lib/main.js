@@ -1,4 +1,19 @@
+import * as tooloud from 'tooloud';
 import {createControlState} from './keystate';
+
+const noise = tooloud.Perlin;
+noise.setSeed(Math.floor(Math.random() * 10000));
+
+const noiseRange = Math.sqrt(3) / 2;
+
+function generateNoise(x, y) {
+	const distSq = Math.pow(x - 0.5, 2) + Math.pow(y - 0.5, 2);
+	let v = noise.noise(x * 12, y * 12, 0);
+	v = (v + noiseRange) / 2;
+	v = 1 - (distSq * 30 * v);
+	return v;
+}
+
 
 const ceil = Math.ceil;
 const floor = Math.floor;
@@ -9,10 +24,22 @@ const emoji = {
 	SMILE: String.fromCharCode(55357) + String.fromCharCode(56835)
 };
 
-const INITIAL_TILE_SIZE = 32;
+const INITIAL_TILE_SIZE = 4;
 const MIN_TILE_SIZE = 4;
 const MAX_TILE_SIZE = 64;
 const SCROLL_SPEED	= MAX_TILE_SIZE / 4;
+
+function heightToTerrain(height) {
+	// console.log(height);
+	if (height < 0.4) {
+		return terrainTypes[0];
+	} else if (height < 0.45) {
+		return terrainTypes[3];
+	} else if (height > 0) {
+		return terrainTypes[1];
+	}
+}
+
 
 const terrainTypes = [
 	{
@@ -106,11 +133,17 @@ class Camera {
 }
 
 function generateMap(width, height) {
-	const numTiles = width * height;
+	let min = Infinity, max = -Infinity;
 	const terrain = new Array(width * height);
-	for (let ix = 0; ix < numTiles; ++ix) {
-		terrain[ix] = terrainTypes[floor(rand() * terrainTypes.length)];
+	for (let y = 0; y < height; ++y) {
+		for (let x = 0; x < width; ++x) {
+			let v = generateNoise(x / width, y / height);
+			if (v < min) min = v;
+			if (v > max) max = v;
+			terrain[y * width + x] = heightToTerrain(v);
+		}
 	}
+	console.log("noise stats: %f .. %f", min, max);
 	return new Map(width, height, terrain);
 }
 
@@ -166,7 +199,7 @@ window.init = function() {
     var canvas = document.querySelector('#canvas');
     var ctx = canvas.getContext('2d');
 
-    var map = generateMap(100, 100);
+    var map = generateMap(250, 250);
     var camera = new Camera(map, canvas.width, canvas.height);
 
     var controls = createControlState({
@@ -202,7 +235,7 @@ window.init = function() {
 	canvas.focus();
 
 	setInterval(() => {
-		const scrollSpeed = SCROLL_SPEED * (controlState.shift.isDown ? 4 : 1);
+		const scrollSpeed = SCROLL_SPEED * (controlState.shift.isDown ? 1 : 4);
 		const now = Date.now();
 		if (controlState.scrollUp.isDown) {
 			camera.y -= scrollSpeed;
