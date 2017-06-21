@@ -24,11 +24,35 @@ proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 ### And here's a 3rd level heading
 
--- code language=javascript, start_line=10  
+-- code language=js
 
-function foo() {
-    console.log("1, 2, 3")	
+
+for (let x = 10; x < 100; x += 10) {
+    console.log("this is awesome");
 }
+
+async function *foo() {
+    const [x,y,z] = [1,2,3];
+}
+
+class Foo {
+    foo() {
+
+    }
+
+    bar() {
+
+    }
+}
+
+let beast = new Foo();
+beast["x"] = 100
+beast["y"] = true
+
+if (x && y != 100) {
+	
+}
+
 
 -- markdown
 
