@@ -1,3 +1,13 @@
 -- markdown
 
-Here's the first post
+So I've decided to have a go at making a game. The vague goal is a top-down RPG, but pretty much all other design decisions are up in the air - turn-based vs. real-time, single character vs. party, procedurally generated vs. handwritten story, and so on. For now the project's codename is "Saga"; you can keep up to date by bookmarking the [saga tag](/tagged/saga/).
+
+This evening I made a start by hacking together a basic starting point that draws a checkerboard tilemap and a bunch of <del>entities</del> circles. The black circle represents the player and responds to basic movement input via the cursor keys, while the red entities simply wander around the map at random. It's written in Javascript right now but moving forward I'm considering Dart; the combination of static typing and cross-platform deployment across mobile and web is seriously compelling.
+
+-- image src="screenshot.png"
+
+-- markdown
+
+Here's an [interactive demo](www/index.htm).
+
+Next step: get a design plan hammered out.
