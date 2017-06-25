@@ -1,0 +1,2 @@
+scss --watch scss/main.scss:www/assets/main.css
+watchify -o www/assets/bundle.js lib/main.js
