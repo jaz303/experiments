@@ -1,0 +1,6 @@
+[x] add inventory div
+[x] add "on ground" div
+[x] populate inventory div on each tick
+[x] populate on ground div on each tick, show/hide
+[x] click on inventory item to drop
+[x] click on ground div to collect

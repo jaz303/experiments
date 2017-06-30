@@ -1,0 +1,94 @@
+<!doctype html>
+
+<html>
+
+<head>
+<title>Saga - Inventory experiment</title>
+<script src='assets/bundle.js'></script>
+<link rel='stylesheet' href='assets/main.css'>
+</head>
+
+<body onload='init();'>
+
+  <div class='ui'>
+    <div class='game'>
+      <canvas id='canvas' width='768' height='640' tabindex='0'></canvas>
+      <div class='on-ground'></div>
+    </div>
+    <div class='party'>
+      
+      <div class='partymember'>
+        <div class='partymember--avatar'></div>
+        <div class='partymember--info'>
+          <div class='partymember--name'>Bob</div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-strength' style='width: 75%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-mana' style='width: 50%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-stamina' style='width: 85%'></div>
+          </div>
+        </div>
+      </div>
+
+      <div class='partymember'>
+        <div class='partymember--avatar'></div>
+        <div class='partymember--info'>
+          <div class='partymember--name'>Jim</div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-strength' style='width: 75%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-mana' style='width: 50%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-stamina' style='width: 85%'></div>
+          </div>
+        </div>
+      </div>
+
+      <div class='partymember'>
+        <div class='partymember--avatar'></div>
+        <div class='partymember--info'>
+          <div class='partymember--name'>Joe</div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-strength' style='width: 75%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-mana' style='width: 50%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-stamina' style='width: 85%'></div>
+          </div>
+        </div>
+      </div>
+
+      <div class='partymember'>
+        <div class='partymember--avatar'></div>
+        <div class='partymember--info'>
+          <div class='partymember--name'>Roger</div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-strength' style='width: 75%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-mana' style='width: 50%'></div>
+          </div>
+          <div class='partymember--stat'>
+            <div class='partymember--statbar is-stamina' style='width: 85%'></div>
+          </div>
+        </div>
+      </div>
+
+      <div class='inventory'>
+        <h2>Inventory</h2>
+        <div class='inventory--items'></div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+
+</html>

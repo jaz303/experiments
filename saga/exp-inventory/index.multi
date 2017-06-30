@@ -1,0 +1,13 @@
+-- markdown
+
+Adding a basic inventory system. Items your character is carrying are displayed in the sidebar; clicking on any of these items will cause it to be dropped on the ground. Items beneath your feet are shown in a bar at the bottom right of the world; again, click to collect the item. There's no concept of weight/bulk/encumberance yet, we'll get to this in due course.
+
+For now I've adjusted the game to be turn-based rather than the 1FPS "realtime" thing I had going on before, which just made the input feel really, really laggy.
+
+-- image src="screenshot.png"
+
+-- markdown
+
+[Demo for this instalment](www/index.htm).
+
+Next step: conversation system, or perhaps basic puzzle mechanics?

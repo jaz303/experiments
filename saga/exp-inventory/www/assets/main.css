@@ -1,0 +1,120 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+html {
+  font: 14px/1 "Helvetica Neue", Helvetica, sans-serif; }
+
+.ui {
+  position: absolute;
+  width: 1024px;
+  height: 768px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #d0d0d0; }
+
+.game {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 768px;
+  height: 640px;
+  background: #c0c0c0; }
+
+.party {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 256px;
+  background: #a0a0a0; }
+
+.partymember {
+  background: #909090;
+  margin: 10px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between; }
+  .partymember--avatar {
+    width: 50px;
+    height: 50px;
+    background: #303030;
+    flex: 0 0 auto; }
+  .partymember--info {
+    padding: 5px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between; }
+  .partymember--statbar {
+    height: 5px; }
+    .partymember--statbar.is-strength {
+      background: red; }
+    .partymember--statbar.is-mana {
+      background: blue; }
+    .partymember--statbar.is-stamina {
+      background: green; }
+
+.inventory {
+  margin: 10px; }
+  .inventory .itemtile {
+    display: inline-block; }
+
+.itemtile {
+  width: 32px;
+  height: 32px; }
+
+.on-ground {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  padding: 10px; }
+  .on-ground .itemtile {
+    display: inline-block; }
+
+/*# sourceMappingURL=main.css.map */
