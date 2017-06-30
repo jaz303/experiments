@@ -125,7 +125,7 @@ window.init = function() {
 		39: 'right'
 	};
 
-	canvas.addEventListener('keydown', (evt) => {
+	document.body.addEventListener('keydown', (evt) => {
 		if (evt.repeat) return;
 		const sym = keyMap[evt.which];
 		if (!sym) return;
