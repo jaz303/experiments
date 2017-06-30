@@ -228,7 +228,7 @@ function drawGame(ui, ctx, state) {
 		ctx.fill();
 	}
 
-	function populateItems(container, list, hide) {
+	function populateItems(container, list, hideIfEmpty) {
 		container.innerHTML = '';
 		list.forEach((e) => {
 			const el = document.createElement('div');
@@ -237,7 +237,7 @@ function drawGame(ui, ctx, state) {
 			el._entity = e;
 			container.appendChild(el);
 		});
-		if (hide) {
+		if (hideIfEmpty) {
 			container.style.display = (list.length > 0) ? '' : 'none';
 		}
 	}
