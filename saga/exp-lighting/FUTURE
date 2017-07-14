@@ -1,0 +1,7 @@
+[ ] lighting model should use hsl, with lightness representing intensity - rather than having a light "radius"? this would make it easier to experiment with colour cycling effects too.
+
+[ ] investigate other decay functions for lighting
+
+[ ] lighting should be calculated based on pixels so it "slides" with animation
+
+[ ] refactor a-star code, it's a mess

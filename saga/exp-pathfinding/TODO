@@ -1,0 +1,9 @@
+[x] add impassable walls
+[x] separation of brain command generation/execution
+[x] brain instances
+[x] UI state machine for setting paths for NPCs
+[x] pathfinding algorithm, store results in queue
+[x] render pathfinding results on map
+[x] implement queue shifting; NPCs revert to random walking after reaching waypoint
+[x] pathfinder bugfix
+[ ] refactor pathfinder so it's sensible
