@@ -18,7 +18,15 @@
 	}
 	
 	console.log("" + size + " x " + size + ":");
-	console.log(array);
+    array.forEach(r => {
+        let ix = 0;
+        r.forEach(c => {
+            if (ix++) process.stdout.write(" ");
+            if (c < 10) process.stdout.write(" ");
+            process.stdout.write('' + c);
+        })
+        process.stdout.write("\n");
+    })
 	console.log("");
 });
 

@@ -1,9 +1,272 @@
 -- markdown
 
+I was feeling energised recently so I decided to tackle lighting. Here's what the game look looks like now:
+
 -- image src="screenshot.png"
 
 -- markdown
 
-[Demo for this instalment](www/index.htm).
+## Lighting Model
 
-Next step: conversation system, or perhaps basic puzzle mechanics?
+As implemented, the lighting model currently supports constant global illumination, a precomputed static lightmap (1:1 mapping with the world tilemap), and point lighting with occlusion (directional lights are not supported but could be added with minimal effort). This feels like a pretty flexible combination and should allow me to do a bunch of cool stuff in the future, including day/night cycles and pre-rendered shadows.
+
+## Implementation
+
+-- code language=javascript
+
+const globalIllumination = [0, 0, 0];
+
+const staticLightmap = map.map((row) => {
+    return row.map(_ => [0.3, 0.3, 0.3]);
+});
+
+const frameLightmap = map.map((row) => {
+    return row.map(_ => [null, null, null]);
+});
+
+-- code language=javascript
+
+for (let y = 0; y < map.height; ++y) {
+    for (let x = 0; x < map.width; ++x) {
+        frameLightmap[y][x][0] = staticLightmap[y][x][0] + globalIllumination[0];
+        frameLightmap[y][x][1] = staticLightmap[y][x][1] + globalIllumination[1];
+        frameLightmap[y][x][2] = staticLightmap[y][x][2] + globalIllumination[2];
+    }
+}
+
+-- code language=javascript
+
+ctx.save();
+ctx.globalCompositeOperation = 'multiply';
+for (let y = 0; y < map.height; ++y) {
+    for (let x = 0; x < map.width; ++x) {
+        const l = frameLightmap[y][x];
+        const r = clamp(l[0], 0, 1);
+        const g = clamp(l[1], 0, 1);
+        const b = clamp(l[2], 0, 1);
+        ctx.fillStyle = 'rgb(' + Math.floor(r*255) + ',' + Math.floor(g*255) + ',' + Math.floor(b*255) + ')';
+        ctx.fillRect(x * TILE_SIDE, y * TILE_SIDE, TILE_SIDE, TILE_SIDE);
+    }
+}
+ctx.restore();
+
+-- code language=markdown
+
+3 x 3:
+ 2  1  2
+ 1 12  1
+ 2  1  2
+
+5 x 5:
+ 2  1  1  1  2
+ 1  4  1  3  1
+ 1  1 20  3  1
+ 1  3  3  2  1
+ 2  1  1  1  2
+
+7 x 7:
+ 2  1  1  1  1  1  2
+ 1  2  2  1  2  2  1
+ 1  2  4  3  4  2  1
+ 1  1  3 28  3  1  1
+ 1  2  4  3  4  2  1
+ 1  2  2  1  2  2  1
+ 2  1  1  1  1  1  2
+
+9 x 9:
+ 2  1  1  1  1  1  1  1  2
+ 1  2  2  1  1  1  2  2  1
+ 1  2  4  2  1  2  3  1  1
+ 1  1  2  6  3  5  2  2  1
+ 1  1  1  3 36  5  3  1  1
+ 1  1  2  5  5  4  2  2  1
+ 1  2  3  2  3  2  2  1  1
+ 1  2  1  2  1  2  1  2  1
+ 2  1  1  1  1  1  1  1  2
+
+11 x 11:
+ 2  1  1  1  1  1  1  1  1  1  2
+ 1  2  1  2  1  1  1  2  1  2  1
+ 1  1  2  2  2  1  2  2  2  1  1
+ 1  2  2  4  2  3  2  4  2  2  1
+ 1  1  2  2  6  5  6  2  2  1  1
+ 1  1  1  3  5 44  5  3  1  1  1
+ 1  1  2  2  6  5  6  2  2  1  1
+ 1  2  2  4  2  3  2  4  2  2  1
+ 1  1  2  2  2  1  2  2  2  1  1
+ 1  2  1  2  1  1  1  2  1  2  1
+ 2  1  1  1  1  1  1  1  1  1  2
+
+13 x 13:
+ 2  1  1  1  1  1  1  1  1  1  1  1  2
+ 1  2  1  2  1  1  1  1  1  2  1  2  1
+ 1  1  2  2  1  2  1  2  1  2  2  1  1
+ 1  2  2  4  2  2  1  2  2  3  2  1  1
+ 1  1  1  2  4  3  3  3  4  2  1  2  1
+ 1  1  2  2  3  8  5  7  3  2  2  1  1
+ 1  1  1  1  3  5 52  7  3  3  1  1  1
+ 1  1  2  2  3  7  7  6  3  2  2  1  1
+ 1  1  1  2  4  3  3  3  4  2  1  2  1
+ 1  2  2  3  2  2  3  2  2  2  2  1  1
+ 1  1  2  2  1  2  1  2  1  2  2  1  1
+ 1  2  1  1  2  1  1  1  2  1  1  2  1
+ 2  1  1  1  1  1  1  1  1  1  1  1  2
+
+15 x 15:
+ 2  1  1  1  1  1  1  1  1  1  1  1  1  1  2
+ 1  2  1  1  2  1  1  1  1  1  2  1  1  2  1
+ 1  1  2  2  1  1  2  1  2  1  1  2  2  1  1
+ 1  1  2  2  2  2  2  1  2  2  2  2  2  1  1
+ 1  2  1  2  4  2  2  3  2  2  4  2  1  2  1
+ 1  1  1  2  2  4  4  3  4  4  2  2  1  1  1
+ 1  1  2  2  2  4  8  7  8  4  2  2  2  1  1
+ 1  1  1  1  3  3  7 60  7  3  3  1  1  1  1
+ 1  1  2  2  2  4  8  7  8  4  2  2  2  1  1
+ 1  1  1  2  2  4  4  3  4  4  2  2  1  1  1
+ 1  2  1  2  4  2  2  3  2  2  4  2  1  2  1
+ 1  1  2  2  2  2  2  1  2  2  2  2  2  1  1
+ 1  1  2  2  1  1  2  1  2  1  1  2  2  1  1
+ 1  2  1  1  2  1  1  1  1  1  2  1  1  2  1
+ 2  1  1  1  1  1  1  1  1  1  1  1  1  1  2
+
+17 x 17:
+ 2  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2
+ 1  2  1  1  2  1  1  1  1  1  1  1  2  1  1  2  1
+ 1  1  2  2  1  1  2  1  1  1  2  1  1  2  2  1  1
+ 1  1  2  2  2  2  1  2  1  2  1  2  2  2  1  1  1
+ 1  2  1  2  4  2  2  2  1  2  2  2  3  2  2  1  1
+ 1  1  1  2  2  4  3  2  3  2  3  4  2  1  1  2  1
+ 1  1  2  1  2  3  6  4  3  4  5  2  2  2  1  1  1
+ 1  1  1  2  2  2  4 10  7  9  4  3  2  2  2  1  1
+ 1  1  1  1  1  3  3  7 68  9  5  3  3  1  1  1  1
+ 1  1  1  2  2  2  4  9  9  8  4  3  2  2  2  1  1
+ 1  1  2  1  2  3  5  4  5  4  4  2  2  2  1  1  1
+ 1  1  1  2  2  4  2  3  3  3  2  4  2  1  1  2  1
+ 1  2  1  2  3  2  2  2  3  2  2  2  2  2  2  1  1
+ 1  1  2  2  2  1  2  2  1  2  2  1  2  2  1  1  1
+ 1  1  2  1  2  1  1  2  1  2  1  1  2  1  2  1  1
+ 1  2  1  1  1  2  1  1  1  1  1  2  1  1  1  2  1
+ 2  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2
+
+-- code language=javascript
+
+function bresenhamWalk(octant, x0,y0, x1,y1, cb) {
+    let tmp;
+    tmp = oi(x0, y0);
+    x0 = tmp[0];
+    y0 = tmp[1];
+    tmp = oi(x1, y1);
+    x1 = tmp[0];
+    y1 = tmp[1];
+
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    let D = 2*dy - dx;
+    let y = y0;
+    for (let x = x0; x <= x1; ++x) {
+        if (oo(x, y) === false) {
+            return;
+        }
+        if (D > 0) {
+            y++;
+            D = D - 2*dx;
+        }
+        D += 2*dy;
+    }
+
+    function oi(x, y) {
+        switch (octant) {
+            case 0: return [x, y];
+            case 1: return [y, x];
+            case 2: return [y, -x];
+            case 3: return [-x, y];
+            case 4: return [-x, -y];
+            case 5: return [-y, -x];
+            case 6: return [-y, x];
+            case 7: return [x, -y];
+        }
+    }
+
+    function oo(x, y) {
+        switch(octant) {
+            case 0: return cb(x, y);
+            case 1: return cb(y, x);
+            case 2: return cb(-y, x);
+            case 3: return cb(-x, y);
+            case 4: return cb(-x, -y);
+            case 5: return cb(-y, -x);
+            case 6: return cb(y, -x);
+            case 7: return cb(x, -y);
+        }
+    }
+}
+
+-- code language=javascript
+
+const marked = {};
+function mark(x, y) {
+    if (!isPassable(state.map, x, y)) {
+        return false;
+    }
+    marked[x + ',' + y] = true;
+}
+
+// Octants (this diagram is flipped on the y-axis):
+//  \2|1/
+//  3\|/0
+// ---+---
+//  4/|\7
+//  /5|6\
+for (let i = 0; i <= lightRadius; ++i) {
+    bresenhamWalk(0, e.x, e.y, e.x + lightRadius, e.y + i, mark);       
+    bresenhamWalk(7, e.x, e.y, e.x + lightRadius, e.y - i, mark);
+    bresenhamWalk(3, e.x, e.y, e.x - lightRadius, e.y + i, mark);       
+    bresenhamWalk(4, e.x, e.y, e.x - lightRadius, e.y - i, mark);
+    bresenhamWalk(1, e.x, e.y, e.x + i, e.y + lightRadius, mark);
+    bresenhamWalk(2, e.x, e.y, e.x - i, e.y + lightRadius, mark);
+    bresenhamWalk(6, e.x, e.y, e.x + i, e.y - lightRadius, mark);
+    bresenhamWalk(5, e.x, e.y, e.x - i, e.y - lightRadius, mark);
+}
+
+-- code language=javascript
+
+const lightX = e.x + 0.5;
+const lightY = e.y + 0.5;
+
+const x1 = lightX - lightRadius;
+const x2 = lightX + lightRadius + 1;
+const y1 = lightY - lightRadius;
+const y2 = lightY + lightRadius + 1;
+for (let y = y1; y < y2; ++y) {
+    for (let x = x1; x < x2; ++x) {
+        const dx = x - lightX;
+        const dy = y - lightY;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        const tx = Math.floor(x);
+        const ty = Math.floor(y);
+        if (tx < 0 || tx >= map.width || ty < 0 || ty >= map.height) continue;  
+        if (!marked[tx + ',' + ty]) continue;
+        const i = clamp(lightRadius - d, 0, lightRadius) / lightRadius;
+        frameLightmap[ty][tx][0] += e.lightColor[0] * i;
+        frameLightmap[ty][tx][1] += e.lightColor[1] * i;
+        frameLightmap[ty][tx][2] += e.lightColor[2] * i;
+    }
+}
+
+-- markdown
+
+## Demo
+
+[Demo for this installment](www/index.htm). Press <kbd>L</kbd> to toggle the hero's light.
+
+## Future Improvements
+
+  - Investigate using HSL rather than RGB
+  - Directional lights
+  - Make static lightmap indirect so it can be modulated with a function?
+
+## Next Steps
+
+  - Support maps larger than a single screen
+  - Add animation/tweening for entity/camera movement
+  - Proper graphics; I'm becoming bored of looking at coloured squares. I've found a few good free/cheap tilesets - will pick one and drop it in.

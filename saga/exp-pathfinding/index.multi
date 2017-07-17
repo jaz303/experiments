@@ -1,9 +1,12 @@
 -- markdown
 
+For this installment I decided to have a go at adding [A* pathfinding](...) to the engine. I know last time round I was thinking about adding various puzzle mechanics but upon reflection I decided that having a reliable pathfinding engine would be far more useful as so many other more complex behaviours rely upon having such a feature in place.
+
+The code is a bit messy as I adapted it from an overly generic monstrosity I wrote a few years back, but it does the job. I'll hammer out a more readable version later, as well as adding [jump point search](https://en.wikipedia.org/wiki/Jump_point_search) optimisations.
+
 -- image src="screenshot.png"
 
 -- markdown
 
-[Demo for this instalment](www/index.htm).
+[Here's a playable demo](www/index.htm). You can set a path for any of the red dots by first clicking on a red dot to select it, and then clicking somewhere on the grid to set a course. The calculated path will be rendered on the world and the entity will follow the next step of this path on each turn. Once reaching its destination, the entity will revert to its default behaviour - either random roam, or stay in place.
 
-Next step: conversation system, or perhaps basic puzzle mechanics?

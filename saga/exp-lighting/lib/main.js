@@ -24,6 +24,8 @@ const map = [
 	[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,],
 ];
 
+const globalIllumination = [0, 0, 0];
+
 const staticLightmap = map.map((row) => {
 	return row.map(_ => [0.3, 0.3, 0.3]);
 });
@@ -305,9 +307,9 @@ function drawGame(ui, ctx, state) {
 	// Base lightmap
 	for (let y = 0; y < map.height; ++y) {
 		for (let x = 0; x < map.width; ++x) {
-			frameLightmap[y][x][0] = staticLightmap[y][x][0];
-			frameLightmap[y][x][1] = staticLightmap[y][x][1];
-			frameLightmap[y][x][2] = staticLightmap[y][x][2];
+			frameLightmap[y][x][0] = staticLightmap[y][x][0] + globalIllumination[0];
+			frameLightmap[y][x][1] = staticLightmap[y][x][1] + globalIllumination[1];
+			frameLightmap[y][x][2] = staticLightmap[y][x][2] + globalIllumination[2];
 		}
 	}
 
@@ -317,7 +319,6 @@ function drawGame(ui, ctx, state) {
 
 		const lightRadius = e.lightRadius;
 
-		// Step 1 - calculate which tiles are lit
 		const marked = {};
 		function mark(x, y) {
 			if (!isPassable(state.map, x, y)) {
