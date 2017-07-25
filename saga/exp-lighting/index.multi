@@ -10,7 +10,9 @@ I was feeling energised recently so I decided to tackle lighting. Here's what th
 
 As implemented, the lighting model currently supports constant global illumination, a precomputed static lightmap (1:1 mapping with the world tilemap), and point lighting with occlusion (directional lights are not supported but could be added with minimal effort). This feels like a pretty flexible combination and should allow me to do a bunch of cool stuff in the future, including day/night cycles and pre-rendered shadows.
 
-## Implementation
+## Basic Implementation
+
+I began by implementing global and static lighting, leaving the more complex point lighting until later. Global illumination is represented as a single 3-element vector, with each component representing a separate lighting channel - one each for red, green and blue. The static lightmap is stored in a 2D array of similar vectors, derived from the world map. Additionally, I defined a scratch area, `frameLightmap`, to store each frame's lighting computation.
 
 -- code language=javascript
 
@@ -24,6 +26,10 @@ const frameLightmap = map.map((row) => {
     return row.map(_ => [null, null, null]);
 });
 
+-- markdown
+
+To render a frame we simply compute the overall lighting for each tile by summing its static vector with the global lighting value:
+
 -- code language=javascript
 
 for (let y = 0; y < map.height; ++y) {
@@ -33,6 +39,10 @@ for (let y = 0; y < map.height; ++y) {
         frameLightmap[y][x][2] = staticLightmap[y][x][2] + globalIllumination[2];
     }
 }
+
+-- markdown
+
+To render the lighting effect we traverse the frame lightmap, drawing a coloured square with a fill matching the tile's lighting value over each previously drawn tile. Using [multiplicative blending](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation), the result is an image modulated by the coloured lighting squares, with lower lighting values creating a darkening effect. Fully lit squares (i.e. `r,g,b == 255,255,255`) pass through unmodified. I read somewhere that performing blending this way is quite expensive but, at least for now, I'm not overly concerned by this - it's a turn based game so there's no need for buttery-smooth 60FPS, plus the end goal is to have a GPU-accelerated renderer anyway.
 
 -- code language=javascript
 
@@ -49,6 +59,16 @@ for (let y = 0; y < map.height; ++y) {
     }
 }
 ctx.restore();
+
+-- markdown
+
+## Adding Point Lighting
+
+At this point I had a decent way of rendering a calculated lightmap, but to create more atmospheric effects like torches, lighting bolts and glowing magical artifacts I needed point lighting.
+
+The algorithm I settled on is pretty naive: for each tile of the light source's bounding square (calculated based on the light's radius/intensity), cast a ray to said tile from the light source, and walk each tile covered by that ray. For each tile thus walked, update the lightmap based by applying a decay function to the light's original colour and distance from the light source. Whenever we hit an impassable tile, abort the current ray's walk.
+
+[Bresenham's Algorithm](https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm) was used for the ray-casting. I had a small concern as I wasn't sure if my perimeter-walking algorithm would result in any unvisited tiles (meaning no lighting would be calculated thereon). Intuitively it seemed it should all work OK but I decided to run a quick test anyway; the numbers below denote the total number of times each cell was hit when casting rays to all cells forming the grid's perimeter. We don't want to see any zeroes in there.
 
 -- code language=markdown
 
@@ -112,41 +132,19 @@ ctx.restore();
  1  2  1  1  2  1  1  1  2  1  1  2  1
  2  1  1  1  1  1  1  1  1  1  1  1  2
 
-15 x 15:
- 2  1  1  1  1  1  1  1  1  1  1  1  1  1  2
- 1  2  1  1  2  1  1  1  1  1  2  1  1  2  1
- 1  1  2  2  1  1  2  1  2  1  1  2  2  1  1
- 1  1  2  2  2  2  2  1  2  2  2  2  2  1  1
- 1  2  1  2  4  2  2  3  2  2  4  2  1  2  1
- 1  1  1  2  2  4  4  3  4  4  2  2  1  1  1
- 1  1  2  2  2  4  8  7  8  4  2  2  2  1  1
- 1  1  1  1  3  3  7 60  7  3  3  1  1  1  1
- 1  1  2  2  2  4  8  7  8  4  2  2  2  1  1
- 1  1  1  2  2  4  4  3  4  4  2  2  1  1  1
- 1  2  1  2  4  2  2  3  2  2  4  2  1  2  1
- 1  1  2  2  2  2  2  1  2  2  2  2  2  1  1
- 1  1  2  2  1  1  2  1  2  1  1  2  2  1  1
- 1  2  1  1  2  1  1  1  1  1  2  1  1  2  1
- 2  1  1  1  1  1  1  1  1  1  1  1  1  1  2
+-- markdown
 
-17 x 17:
- 2  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2
- 1  2  1  1  2  1  1  1  1  1  1  1  2  1  1  2  1
- 1  1  2  2  1  1  2  1  1  1  2  1  1  2  2  1  1
- 1  1  2  2  2  2  1  2  1  2  1  2  2  2  1  1  1
- 1  2  1  2  4  2  2  2  1  2  2  2  3  2  2  1  1
- 1  1  1  2  2  4  3  2  3  2  3  4  2  1  1  2  1
- 1  1  2  1  2  3  6  4  3  4  5  2  2  2  1  1  1
- 1  1  1  2  2  2  4 10  7  9  4  3  2  2  2  1  1
- 1  1  1  1  1  3  3  7 68  9  5  3  3  1  1  1  1
- 1  1  1  2  2  2  4  9  9  8  4  3  2  2  2  1  1
- 1  1  2  1  2  3  5  4  5  4  4  2  2  2  1  1  1
- 1  1  1  2  2  4  2  3  3  3  2  4  2  1  1  2  1
- 1  2  1  2  3  2  2  2  3  2  2  2  2  2  2  1  1
- 1  1  2  2  2  1  2  2  1  2  2  1  2  2  1  1  1
- 1  1  2  1  2  1  1  2  1  2  1  1  2  1  2  1  1
- 1  2  1  1  1  2  1  1  1  1  1  2  1  1  1  2  1
- 2  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2
+That all looks good. Next I wrote a function that performed a walk of Bresenham's algorithm on a cartesian grid, invoking a callback for each visited tile. This turned out to be slightly tricky as most implementations of the algorithm work by swapping the start and end co-ordinates under certain conditions to ensure that the line's slope always matches the necessary invariants, but such swap causes the walk to become outside-in rather than inside-out. For the purposes of lighting it's critical that the algorithm always walks from (x0,y0) to (x1,y1), as going in the opposite direction means that iteration potentially starts from beyond an impassable object, leaving a ray of light *behind* the wall and none between the wall and the light source.
+
+The standard definition of Bresenham's algorithm only behaves correctly in octant zero of the diagram depicted below:
+
+     \2|1/
+     3\|/0
+    ---+---
+     4/|\7
+     /5|6\
+
+To handle all octants, the walk function was modified to accept the current octant as an explicit argument and to perform juggling on the input/output values that allow the algorithm to always operate on co-ordinate pairs in octant zero. The trade-off is that it's now necessary to manually co-ordinate eight separate calls to `bresenhamWalk()`, but it's simple enough to extract a helper function to do this transparently.
 
 -- code language=javascript
 
@@ -201,6 +199,10 @@ function bresenhamWalk(octant, x0,y0, x1,y1, cb) {
     }
 }
 
+-- markdown
+
+The penultimate step is to perform the ray-casting and record which tiles are lit. Technically this could be combined with the lighting calculation performed in the next step but I found a two-step approach simpler conceptually.
+
 -- code language=javascript
 
 const marked = {};
@@ -211,12 +213,6 @@ function mark(x, y) {
     marked[x + ',' + y] = true;
 }
 
-// Octants (this diagram is flipped on the y-axis):
-//  \2|1/
-//  3\|/0
-// ---+---
-//  4/|\7
-//  /5|6\
 for (let i = 0; i <= lightRadius; ++i) {
     bresenhamWalk(0, e.x, e.y, e.x + lightRadius, e.y + i, mark);       
     bresenhamWalk(7, e.x, e.y, e.x + lightRadius, e.y - i, mark);
@@ -227,6 +223,12 @@ for (let i = 0; i <= lightRadius; ++i) {
     bresenhamWalk(6, e.x, e.y, e.x + i, e.y - lightRadius, mark);
     bresenhamWalk(5, e.x, e.y, e.x - i, e.y - lightRadius, mark);
 }
+
+-- markdown
+
+(I wimped out and used an object and stringy keys for tracking visited squares; in the future I'll optimise this to use an array).
+
+Finally we iterate over each tile within the light source's bounding box and, if the tile is lit, update the frame lightmap based on the light's colour and the tile's distance from the light source. I'm just using a simple linear decay function for now and it works well enough for now.
 
 -- code language=javascript
 
