@@ -1,11 +1,20 @@
 -- markdown
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+The [summed-area table](https://en.wikipedia.org/wiki/Summed-area_table) is a cool data structure
+I learned about recently that allows the sum of a rectangular sub-range within a 2D array to
+be calculated in O(1) time. The algorithm can easily be extended to higher dimensions.
 
--- code language=swift, file="code.swift"
+To create a summed-area table, we create an auxiliary 2D array with dimensions matching
+our input array, and then proceed to populate it such that every cell's value is the
+cumulative sum of all cells with lower <code>(i,j)</code> indices. Once we've created
+this auxiliary array, an arbitrary sub-region's summed-area can be calculated by looking
+up and combining just four values, as depicted in the diagram below (courtesy of Wikipedia):
+
+![](summed_area_table.png)
+
+I threw together a quick implementation in [D](https://dlang.org/), a language I've
+wanted to try out for quite a while now. It's quite a nice language so I'll try to
+find some more experiments to use it on in the future.
+
+-- code language=d, file="src/main.d"
 
