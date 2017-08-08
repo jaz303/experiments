@@ -1,0 +1,7 @@
+-- markdown
+
+A few years ago I had a couple of hours to kill on the train and was looking for a quick project to help pass the time; [@alisdair](https://twitter.com/alisdair) suggested that I have a go at implementing the [RC4 Stream Cipher](https://en.wikipedia.org/wiki/RC4) in Excel. So I did.
+
+Download here: [ODS](rc4.ods) | [XLS](rc4.xls)
+
+-- image src="rc4.png"
